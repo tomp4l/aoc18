@@ -11,7 +11,8 @@ import cats.effect.ExitCode
 object Main extends IOApp:
 
   private val days: Map[Int, Day] = Map(
-    17 -> day17.Program
+    17 -> day17.Program,
+    18 -> day18.Program
   )
 
   def run(args: List[String]): IO[ExitCode] =
