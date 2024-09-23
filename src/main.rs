@@ -1,0 +1,90 @@
+use std::{collections::HashMap, fmt::Debug, fs, process::exit};
+
+mod days;
+
+use day::Day;
+use days::*;
+
+use clap::Parser;
+
+#[derive(Parser)]
+struct Opt {
+    day: String,
+}
+
+impl Opt {
+    fn day(&self) -> Option<i32> {
+        self.day.parse().ok()
+    }
+
+    fn all_days(&self) -> bool {
+        self.day == "all"
+    }
+}
+
+fn default_error_handler<E: Debug, R>(error: E) -> R {
+    println!("{:#?}", error);
+    exit(1);
+}
+
+fn main() {
+    let opt = Opt::parse();
+    let mut programs: HashMap<i32, Box<dyn Day>> = HashMap::new();
+    programs.insert(1, Box::new(day1::Instance));
+    programs.insert(2, Box::new(day2::Instance));
+    programs.insert(3, Box::new(day3::Instance));
+    programs.insert(4, Box::new(day4::Instance));
+    programs.insert(5, Box::new(day5::Instance));
+    programs.insert(6, Box::new(day6::Instance::default()));
+    programs.insert(7, Box::new(day7::Instance::default()));
+    programs.insert(8, Box::new(day8::Instance));
+    programs.insert(9, Box::new(day9::Instance));
+    programs.insert(10, Box::new(day10::Instance));
+    programs.insert(11, Box::new(day11::Instance));
+    programs.insert(12, Box::new(day12::Instance));
+    programs.insert(13, Box::new(day13::Instance));
+    programs.insert(14, Box::new(day14::Instance));
+    programs.insert(15, Box::new(day15::Instance));
+    programs.insert(16, Box::new(day16::Instance));
+    programs.insert(17, Box::new(day17::Instance::default()));
+    programs.insert(18, Box::new(day18::Instance));
+    programs.insert(19, Box::new(day19::Instance));
+    programs.insert(20, Box::new(day20::Instance::default()));
+    programs.insert(21, Box::new(day21::Instance));
+    programs.insert(22, Box::new(day22::Instance));
+    programs.insert(23, Box::new(day23::Instance));
+    programs.insert(24, Box::new(day24::Instance));
+    programs.insert(25, Box::new(day25::Instance));
+
+    let days = if opt.all_days() {
+        let mut d: Vec<_> = programs.keys().copied().collect();
+        d.sort();
+        d
+    } else if let Some(day) = opt.day() {
+        vec![day]
+    } else {
+        default_error_handler(format!("Invalid day: {}", opt.day))
+    };
+
+    for day in days {
+        println!("Day {}", day);
+        run_program(day, &programs);
+        println!();
+    }
+}
+
+fn run_program(day: i32, programs: &HashMap<i32, Box<dyn Day>>) {
+    let program = programs
+        .get(&day)
+        .unwrap_or_else(|| default_error_handler(format!("Undefined day: {}", day).as_str()));
+    let file_contents =
+        fs::read_to_string(format!("input/day{}.txt", day)).unwrap_or_else(default_error_handler);
+    let result = program
+        .run(file_contents.trim_end())
+        .unwrap_or_else(default_error_handler);
+
+    println!("Part 1: {}", result.part1);
+    if let Some(v) = result.part2 {
+        println!("Part 2: {}", v)
+    }
+}
